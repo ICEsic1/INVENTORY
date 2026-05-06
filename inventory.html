@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThreadCount — Inventory</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#18181b; --bg:#f8f7f4; --surface:#ffffff; --border:#e4e0d8;
+  --gold:#c9922a; --gold-light:#fdf3e3; --gold-dark:#a87520;
+  --red:#dc2626; --red-light:#fef2f2; --red-row:#fff5f5;
+  --green:#16a34a; --green-light:#f0fdf4; --green-row:#f7fdf9;
+  --muted:#71717a; --muted2:#a1a1aa;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+h1,h2,h3,.serif{font-family:'Playfair Display',serif}
+
+/* ═══ LOGIN SCREEN ═══ */
+#loginScreen{
+  position:fixed;inset:0;background:linear-gradient(135deg,#18181b 0%,#27272a 50%,#1a1208 100%);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+}
+.login-box{
+  background:var(--surface);border-radius:20px;padding:40px 36px 36px;
+  width:100%;max-width:380px;box-shadow:var(--shadow-lg);
+  border-top:4px solid var(--gold);
+}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo h1{font-size:2rem;color:var(--ink)}
+.login-logo p{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:4px;font-family:'Nunito',sans-serif;font-weight:700}
+.login-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
+.login-input{
+  width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);
+  font-size:.9rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);
+  background:var(--bg);margin-bottom:14px;transition:border-color .15s;
+}
+.login-input:focus{border-color:var(--gold)}
+.login-btn{
+  width:100%;padding:13px;border-radius:9px;border:none;
+  background:var(--gold);color:#fff;font-size:.88rem;font-weight:700;
+  font-family:'Nunito',sans-serif;cursor:pointer;letter-spacing:.04em;
+  text-transform:uppercase;transition:background .15s;margin-top:4px;
+}
+.login-btn:hover{background:var(--gold-dark)}
+.login-err{color:var(--red);font-size:.8rem;text-align:center;margin-top:10px;min-height:20px;font-weight:600}
+.login-hint{
+  background:var(--gold-light);border:1px solid #f0d090;border-radius:8px;
+  padding:10px 14px;margin-top:18px;font-size:.75rem;color:#7a5c10;line-height:1.5;
+}
+.login-hint strong{display:block;margin-bottom:3px;font-size:.73rem;letter-spacing:.06em;text-transform:uppercase}
+.cloud-setup{margin-top:16px}
+.cloud-toggle{
+  font-size:.75rem;color:var(--muted);text-align:center;cursor:pointer;
+  text-decoration:underline;display:block;margin-bottom:10px;
+}
+.cloud-panel{display:none;background:#f4f4f5;border-radius:8px;padding:12px}
+.cloud-panel.open{display:block}
+.cloud-panel label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px;margin-top:8px}
+.cloud-panel label:first-child{margin-top:0}
+.cloud-panel input{
+  width:100%;padding:7px 10px;border-radius:6px;border:1.5px solid var(--border);
+  font-size:.78rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);background:#fff;
+}
+.cloud-panel input:focus{border-color:var(--gold)}
+.cloud-save-btn{
+  margin-top:10px;width:100%;padding:8px;border-radius:6px;border:none;
+  background:var(--ink);color:#fff;font-size:.75rem;font-weight:700;
+  font-family:'Nunito',sans-serif;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* ═══ APP LAYOUT ═══ */
+#app{display:none}
+.header{
+  background:var(--ink);color:#fff;
+  padding:14px 20px 12px;position:sticky;top:0;z-index:100;
+  border-bottom:3px solid var(--gold);
+}
+.header-inner{max-width:1040px;margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header h1{font-size:1.45rem;letter-spacing:-.02em;line-height:1;color:#fff}
+.header-sub{font-size:.68rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.user-pill{
+  display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:5px 12px 5px 8px;
+  font-size:.75rem;font-weight:600;color:#fff;
+}
+.user-avatar{width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
+
+/* ═══ TABS ═══ */
+.tabs{background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:66px;z-index:90}
+.tabs-inner{max-width:1040px;margin:auto;display:flex;gap:0;overflow-x:auto}
+.tab-btn{
+  padding:12px 20px;font-size:.78rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);background:none;border:none;
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  font-family:'Nunito',sans-serif;transition:all .15s;margin-bottom:-2px;
+}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-btn:hover:not(.active){color:var(--ink)}
+
+/* ═══ MAIN ═══ */
+.main{max-width:1040px;margin:0 auto;padding:16px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--surface);border-radius:10px;padding:13px;box-shadow:var(--shadow);text-align:center;border:1.5px solid var(--border)}
+.stat-card .num{font-size:1.7rem;font-weight:700;line-height:1;font-family:'Playfair Display',serif}
+.stat-card .lbl{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:700}
+.stat-card.s-alert .num{color:var(--red)}
+.stat-card.s-ok    .num{color:var(--green)}
+.stat-card.s-gold  .num{color:var(--gold)}
+
+/* Toolbar */
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.srch{flex:1;min-width:140px;padding:9px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.84rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink)}
+.srch:focus{border-color:var(--gold)}
+.fsel{padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.77rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);cursor:pointer}
+.fsel:focus{border-color:var(--gold)}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;
+  font-size:.77rem;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;
+  transition:all .15s;font-family:'Nunito',sans-serif;text-transform:uppercase;white-space:nowrap;
+}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-dark)}
+.btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{background:#27272a}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.22)}.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.btn-plain{background:var(--surface);color:var(--ink);border:1.5px solid var(--border)}.btn-plain:hover{border-color:var(--ink)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b91c1c}
+
+/* Cloud status */
+.cloud-status{
+  display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;
+  padding:4px 10px;border-radius:20px;letter-spacing:.04em;
+}
+.cloud-status.ok{background:#dcfce7;color:#15803d}
+.cloud-status.local{background:#fef9c3;color:#854d0e}
+.cloud-status.syncing{background:#e0f2fe;color:#0369a1}
+.cloud-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:none}
+.cloud-status.syncing .cloud-dot{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ═══ TABLE ═══ */
+.scroll-hint{font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:4px;display:none}
+@media(max-width:680px){.scroll-hint{display:block}}
+.table-wrap{background:var(--surface);border-radius:12px;box-shadow:var(--shadow);border:1.5px solid var(--border);overflow:hidden}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead tr{background:var(--ink)}
+thead th{padding:11px 14px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+thead th.c{text-align:center}
+thead th:first-child{padding-left:18px}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr.row-ok{background:#fff}
+tbody tr.row-ok:hover{background:var(--green-row)}
+tbody tr.row-low{background:var(--red-row)}
+tbody tr.row-low:hover{background:#fee2e2}
+tbody td{padding:9px 14px;vertical-align:middle;white-space:nowrap}
+tbody td.c{text-align:center}
+tbody td:first-child{padding-left:18px}
+
+.section-row td{padding:5px 18px;font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:#f4f4f5;border-bottom:none}
+
+/* Color swatch */
+.color-dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,.12);vertical-align:middle;margin-right:6px;flex-shrink:0}
+.cell-name{display:flex;align-items:center}
+.name-text{display:flex;flex-direction:column}
+.item-name{font-weight:700;font-size:.86rem}
+.item-sku{font-size:.66rem;color:var(--muted);font-family:monospace;margin-top:1px}
+.item-colors{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+
+/* Tags */
+.tag{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:700}
+.tag-cat{background:#ede9fe;color:#5b21b6}
+.tag-size{background:#dcfce7;color:#15803d}
+
+/* Badge */
+.badge{display:inline-block;font-size:.64rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em}
+.badge-ok{background:#dcfce7;color:#15803d}
+.badge-low{background:#fee2e2;color:#991b1b}
+
+/* Stock cell */
+.stock-val{font-size:1.05rem;font-weight:800;font-family:'Playfair Display',serif}
+.stock-val.ok{color:var(--green)}.stock-val.low{color:var(--red)}
+.mini-bar{width:60px;height:4px;background:var(--border);border-radius:2px;margin:3px auto 0;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px;transition:width .4s}
+.fill-ok{background:var(--green)}.fill-low{background:var(--red)}
+.thresh-val{font-size:.74rem;color:var(--muted);font-weight:600}
+
+/* Stripe */
+.stripe{display:inline-block;width:4px;height:36px;border-radius:2px;margin-right:9px;flex-shrink:0}
+.stripe-ok{background:var(--green)}.stripe-low{background:var(--red)}
+
+/* Qty controls */
+.qty-wrap{display:inline-flex;align-items:center}
+.qty-btn{width:28px;height:28px;border:1.5px solid var(--border);background:var(--surface);font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--ink);flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.qty-btn.m{border-radius:6px 0 0 6px;border-right:none}.qty-btn.p{border-radius:0 6px 6px 0;border-left:none}
+.qty-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.qty-btn:active{transform:scale(.9)}
+.qty-mid{width:34px;height:28px;border:1.5px solid var(--border);border-left:none;border-right:none;background:var(--surface);display:flex;align-items:center;justify-content:center}
+.qty-mid input{width:100%;text-align:center;border:none;outline:none;font-size:.8rem;font-weight:700;font-family:'Nunito',sans-serif;background:transparent;color:var(--ink)}
+
+/* Row actions */
+.row-acts{display:flex;gap:4px;justify-content:center}
+.act-btn{padding:4px 9px;border-radius:5px;font-size:.65rem;font-weight:700;cursor:pointer;letter-spacing:.03em;text-transform:uppercase;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .12s;font-family:'Nunito',sans-serif;white-space:nowrap}
+.act-btn:hover{border-color:var(--ink);color:var(--ink)}
+.act-btn.del:hover{border-color:var(--red);color:var(--red)}
+
+/* Empty */
+.empty-cell{text-align:center;padding:52px 20px;color:var(--muted);font-size:.9rem}
+
+/* ═══ MODAL ═══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:520px;transform:translateY(40px);transition:transform .25s cubic-bezier(.22,.68,0,1.2);box-shadow:0 -6px 40px rgba(0,0,0,.18)}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal h2{font-size:1.3rem;margin-bottom:18px}
+.form-group{margin-bottom:13px}
+.form-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800;display:block;margin-bottom:5px}
+.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.88rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);transition:border-color .15s}
+.form-input:focus,.form-select:focus{border-color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-btns{display:flex;gap:10px;margin-top:18px}
+.modal-btns .btn{flex:1;justify-content:center;padding:12px}
+
+/* Color picker section */
+.color-picker-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.color-chip{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s;flex-shrink:0}
+.color-chip.selected{border-color:var(--ink);transform:scale(1.15)}
+.color-chip:hover{transform:scale(1.1)}
+.selected-colors-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;min-height:24px}
+.sel-color-tag{display:inline-flex;align-items:center;gap:4px;background:#f4f4f5;border-radius:20px;padding:3px 8px 3px 6px;font-size:.7rem;font-weight:600}
+.sel-color-tag span.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
+.sel-color-tag button{background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--muted);padding:0;line-height:1}
+
+/* ═══ AUDIT LOG ═══ */
+.audit-wrap{background:var(--surface);border-radius:12px;box-shadow:var(--shadow);border:1.5px solid var(--border);overflow:hidden}
+.audit-head{background:var(--ink);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.audit-head h3{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-family:'Nunito',sans-serif;font-weight:800}
+.audit-list{max-height:520px;overflow-y:auto}
+.audit-entry{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .1s}
+.audit-entry:last-child{border-bottom:none}
+.audit-entry:hover{background:var(--bg)}
+.audit-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.ai-add{background:#dcfce7}.ai-remove{background:#fee2e2}.ai-edit{background:#fef9c3}.ai-delete{background:#fce7f3}.ai-login{background:#e0f2fe}
+.audit-body{flex:1}
+.audit-action{font-size:.82rem;font-weight:700;color:var(--ink)}
+.audit-meta{font-size:.7rem;color:var(--muted);margin-top:2px}
+.audit-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.88rem}
+.audit-filters{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:#fafafa}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:.82rem;font-weight:600;z-index:500;transition:transform .3s cubic-bezier(.22,.68,0,1.2),opacity .3s;opacity:0;white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>ThreadCount</h1>
+      <p>Inventory System</p>
+    </div>
+    <label class="login-label">Username</label>
+    <input class="login-input" id="loginUser" type="text" placeholder="Enter username" autocomplete="username">
+    <label class="login-label">Password</label>
+    <input class="login-input" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-hint">
+      <strong>Default Credentials</strong>
+      Admin: <b>admin</b> / <b>admin123</b><br>
+      Staff: <b>staff</b> / <b>staff123</b>
+    </div>
+    <div class="cloud-setup">
+      <span class="cloud-toggle" onclick="toggleCloudPanel()">⚙ Configure JSONBin Cloud Storage (optional)</span>
+      <div class="cloud-panel" id="cloudPanel">
+        <label>JSONBin API Key (X-Master-Key)</label>
+        <input type="text" id="cfgApiKey" placeholder="$2a$10$...">
+        <label>Bin ID (leave blank to auto-create)</label>
+        <input type="text" id="cfgBinId" placeholder="6123abc...">
+        <button class="cloud-save-btn" onclick="saveCloudConfig()">Save & Connect</button>
+        <div style="margin-top:8px;font-size:.7rem;color:#666;line-height:1.5">
+          Get a free key at <b>jsonbin.io</b> → API Keys. Data syncs across devices when configured.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div>
+        <h1>ThreadCount</h1>
+        <div class="header-sub">Clothing Inventory</div>
+      </div>
+      <div class="header-right">
+        <span id="cloudStatus" class="cloud-status local"><span class="cloud-dot"></span> Local</span>
+        <div class="user-pill">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <span id="userLabel">Admin</span>
+        </div>
+        <button class="btn btn-ghost" style="font-size:.7rem;padding:6px 10px" onclick="doLogout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tabs-inner">
+      <button class="tab-btn active" onclick="switchTab('inventory',this)">📦 Inventory</button>
+      <button class="tab-btn" onclick="switchTab('audit',this)">📋 Audit History</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── INVENTORY TAB ── -->
+    <div class="tab-panel active" id="tab-inventory">
+
+      <div class="stats" id="statsBar"></div>
+
+      <div class="toolbar">
+        <input class="srch" type="text" placeholder="🔍 Search name, SKU, color…" id="searchInput" oninput="renderTable()">
+        <select class="fsel" id="filterCat" onchange="renderTable()"><option value="">All Categories</option></select>
+        <select class="fsel" id="filterColor" onchange="renderTable()"><option value="">All Colors</option></select>
+        <select class="fsel" id="filterStatus" onchange="renderTable()">
+          <option value="">All Status</option>
+          <option value="low">⚠ Low Stock</option>
+          <option value="ok">✓ In Stock</option>
+        </select>
+        <button class="btn btn-gold" onclick="openModal()">＋ Add Item</button>
+        <button class="btn btn-ink"  onclick="downloadReport()">⬇ Export</button>
+      </div>
+
+      <p class="scroll-hint">← Swipe table to see all columns →</p>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Item / SKU</th>
+                <th>Colors</th>
+                <th>Category</th>
+                <th class="c">Size</th>
+                <th class="c">Stock</th>
+                <th class="c">Min.</th>
+                <th class="c">Status</th>
+                <th class="c">Adjust</th>
+                <th class="c">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AUDIT TAB ── -->
+    <div class="tab-panel" id="tab-audit">
+      <div class="toolbar" style="margin-bottom:10px">
+        <input class="srch" type="text" placeholder="🔍 Search audit log…" id="auditSearch" oninput="renderAudit()">
+        <select class="fsel" id="auditType" onchange="renderAudit()">
+          <option value="">All Actions</option>
+          <option value="ADD">Added</option>
+          <option value="REMOVE">Removed</option>
+          <option value="EDIT">Edited</option>
+          <option value="DELETE">Deleted</option>
+          <option value="LOGIN">Login</option>
+        </select>
+        <button class="btn btn-plain" onclick="clearAudit()" id="clearAuditBtn">🗑 Clear Log</button>
+      </div>
+      <div class="audit-wrap">
+        <div class="audit-head">
+          <h3>📋 Audit History</h3>
+          <span id="auditCount" style="font-size:.7rem;color:var(--muted2);font-weight:700"></span>
+        </div>
+        <div class="audit-list" id="auditList"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg" onclick="handleBgClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modalTitle">Add New Item</h2>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Item Name *</label><input class="form-input" id="fName" placeholder="e.g. Oxford Shirt"></div>
+      <div class="form-group"><label class="form-label">SKU</label><input class="form-input" id="fSku" placeholder="e.g. OXF-BLU-M"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Category *</label>
+        <select class="form-select" id="fCat">
+          <option>Shirts</option><option>Pants</option><option>Dresses</option><option>Skirts</option>
+          <option>Jackets</option><option>Shorts</option><option>Sweaters</option>
+          <option>Accessories</option><option>Footwear</option><option>Underwear</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Size *</label>
+        <select class="form-select" id="fSize">
+          <option>XS</option><option>S</option><option selected>M</option><option>L</option>
+          <option>XL</option><option>XXL</option><option>Free Size</option>
+          <option>24</option><option>26</option><option>28</option><option>30</option><option>32</option><option>34</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Current Stock *</label><input class="form-input" id="fStock" type="number" min="0" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">Low Stock Threshold *</label><input class="form-input" id="fThresh" type="number" min="1" placeholder="5"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Item Colors (pick all that apply)</label>
+      <div class="color-picker-wrap" id="colorPicker"></div>
+      <div class="selected-colors-list" id="selectedColorsList"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-plain" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold"  onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const ADMINS = {
+  admin: { pass: 'admin123', role: 'Admin',  canDelete: true  },
+  staff: { pass: 'staff123', role: 'Staff',  canDelete: false },
+};
+
+const COLORS = [
+  { name:'White',   hex:'#ffffff' },{ name:'Black',   hex:'#1a1a1a' },
+  { name:'Gray',    hex:'#9ca3af' },{ name:'Red',     hex:'#ef4444' },
+  { name:'Pink',    hex:'#f472b6' },{ name:'Orange',  hex:'#f97316' },
+  { name:'Yellow',  hex:'#facc15' },{ name:'Lime',    hex:'#84cc16' },
+  { name:'Green',   hex:'#22c55e' },{ name:'Teal',    hex:'#14b8a6' },
+  { name:'Cyan',    hex:'#06b6d4' },{ name:'Blue',    hex:'#3b82f6' },
+  { name:'Indigo',  hex:'#6366f1' },{ name:'Violet',  hex:'#8b5cf6' },
+  { name:'Purple',  hex:'#a855f7' },{ name:'Brown',   hex:'#92400e' },
+  { name:'Beige',   hex:'#d6c5a0' },{ name:'Navy',    hex:'#1e3a5f'  },
+  { name:'Maroon',  hex:'#7f1d1d' },{ name:'Olive',   hex:'#4d5c1e'  },
+];
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let currentUser = null;
+let items = [];
+let audit = [];
+let selectedColors = [];   // for modal
+let editId = null;
+
+// Cloud config
+let cloudCfg = JSON.parse(localStorage.getItem('tc_cloud') || 'null') || { apiKey:'', binId:'' };
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════════════════════
+// LOCAL STORAGE
+// ═══════════════════════════════════════════════
+function loadLocal(){
+  items = JSON.parse(localStorage.getItem('tc_items')||'null') || defaultItems();
+  audit = JSON.parse(localStorage.getItem('tc_audit')||'[]');
+}
+function saveLocal(){
+  localStorage.setItem('tc_items', JSON.stringify(items));
+  localStorage.setItem('tc_audit', JSON.stringify(audit));
+}
+function defaultItems(){
+  return [
+    {id:uid(),name:'Oxford Button Shirt', sku:'OXF-WHT-M',  cat:'Shirts',   size:'M',  stock:24,thresh:10,colors:['#ffffff','#3b82f6','#1a1a1a']},
+    {id:uid(),name:'Slim Chino Pants',    sku:'CHN-KHK-32', cat:'Pants',    size:'32', stock:4, thresh:8, colors:['#d6c5a0','#9ca3af']},
+    {id:uid(),name:'Floral Wrap Dress',   sku:'FWD-BLU-S',  cat:'Dresses',  size:'S',  stock:12,thresh:5, colors:['#f472b6','#a855f7','#ffffff']},
+    {id:uid(),name:'Denim Jacket',        sku:'DNM-JKT-L',  cat:'Jackets',  size:'L',  stock:3, thresh:6, colors:['#3b82f6','#1a1a1a']},
+    {id:uid(),name:'Linen Shorts',        sku:'LIN-SHT-M',  cat:'Shorts',   size:'M',  stock:18,thresh:5, colors:['#facc15','#ffffff','#84cc16']},
+    {id:uid(),name:'Knit Sweater',        sku:'KNT-GRY-XL', cat:'Sweaters', size:'XL', stock:2, thresh:4, colors:['#9ca3af','#92400e']},
+    {id:uid(),name:'Pleated Skirt',       sku:'PLT-SKT-S',  cat:'Skirts',   size:'S',  stock:9, thresh:5, colors:['#1a1a1a','#ffffff']},
+    {id:uid(),name:'Classic White Tee',   sku:'CWT-WHT-L',  cat:'Shirts',   size:'L',  stock:1, thresh:10,colors:['#ffffff']},
+  ];
+}
+
+// ═══════════════════════════════════════════════
+// CLOUD (JSONBin.io)
+// ═══════════════════════════════════════════════
+function setCloudStatus(state){
+  const el = document.getElementById('cloudStatus');
+  el.className = 'cloud-status '+state;
+  el.innerHTML = {
+    ok:      '<span class="cloud-dot"></span> Cloud Synced',
+    local:   '<span class="cloud-dot"></span> Local Only',
+    syncing: '<span class="cloud-dot"></span> Syncing…',
+    error:   '<span class="cloud-dot"></span> Sync Error',
+  }[state] || '';
+}
+
+async function cloudLoad(){
+  if(!cloudCfg.apiKey || !cloudCfg.binId) return false;
+  setCloudStatus('syncing');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}/latest`,{
+      headers:{'X-Master-Key':cloudCfg.apiKey}
+    });
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if(d.record){
+      if(d.record.items)  items = d.record.items;
+      if(d.record.audit)  audit = d.record.audit;
+    }
+    setCloudStatus('ok');
+    return true;
+  } catch(e){
+    setCloudStatus('error');
+    return false;
+  }
+}
+
+async function cloudSave(){
+  if(!cloudCfg.apiKey) return;
+  // Auto-create bin if needed
+  if(!cloudCfg.binId){
+    try {
+      setCloudStatus('syncing');
+      const r = await fetch('https://api.jsonbin.io/v3/b',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'threadcount-inventory'},
+        body: JSON.stringify({items,audit})
+      });
+      if(!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      cloudCfg.binId = d.metadata.id;
+      localStorage.setItem('tc_cloud', JSON.stringify(cloudCfg));
+      document.getElementById('cfgBinId').value = cloudCfg.binId;
+      setCloudStatus('ok');
+    } catch(e){ setCloudStatus('error'); }
+    return;
+  }
+  try {
+    setCloudStatus('syncing');
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey},
+      body: JSON.stringify({items,audit})
+    });
+    if(!r.ok) throw new Error(r.status);
+    setCloudStatus('ok');
+  } catch(e){ setCloudStatus('error'); }
+}
+
+function saveAll(){
+  saveLocal();
+  cloudSave();
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if(!u||!p){ err.textContent='Please enter username and password.'; return; }
+  const acct = ADMINS[u.toLowerCase()];
+  if(!acct || acct.pass !== p){ err.textContent='Invalid username or password.'; return; }
+  currentUser = { username: u, ...acct };
+  err.textContent='';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('userAvatar').textContent = u[0].toUpperCase();
+  document.getElementById('userLabel').textContent   = acct.role+': '+u;
+  addAudit('LOGIN','System','',`${acct.role} "${u}" signed in`);
+  loadLocal();
+  cloudLoad().then(fromCloud => {
+    if(!fromCloud) setCloudStatus('local');
+    renderTable();
+    renderAudit();
+  });
+}
+
+function doLogout(){
+  addAudit('LOGIN','System','',`"${currentUser.username}" signed out`);
+  saveAll();
+  currentUser = null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPass').value='';
+}
+
+function toggleCloudPanel(){
+  const p = document.getElementById('cloudPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    document.getElementById('cfgApiKey').value = cloudCfg.apiKey||'';
+    document.getElementById('cfgBinId').value  = cloudCfg.binId||'';
+  }
+}
+
+function saveCloudConfig(){
+  cloudCfg.apiKey = document.getElementById('cfgApiKey').value.trim();
+  cloudCfg.binId  = document.getElementById('cfgBinId').value.trim();
+  localStorage.setItem('tc_cloud', JSON.stringify(cloudCfg));
+  showToast('Cloud config saved!');
+  document.getElementById('cloudPanel').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// AUDIT LOG
+// ═══════════════════════════════════════════════
+function addAudit(type, itemName, itemId, detail){
+  audit.unshift({
+    id: uid(), type, itemName, itemId, detail,
+    user: currentUser ? currentUser.username : 'system',
+    ts: Date.now()
+  });
+  if(audit.length > 500) audit = audit.slice(0,500);
+}
+
+function fmtTime(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+const AUDIT_ICONS = { ADD:'➕', REMOVE:'➖', EDIT:'✏️', DELETE:'🗑️', LOGIN:'🔑' };
+const AUDIT_CLS   = { ADD:'ai-add', REMOVE:'ai-remove', EDIT:'ai-edit', DELETE:'ai-delete', LOGIN:'ai-login' };
+
+function renderAudit(){
+  const q   = (document.getElementById('auditSearch').value||'').toLowerCase();
+  const typ = document.getElementById('auditType').value;
+  const list= document.getElementById('auditList');
+  const cnt = document.getElementById('auditCount');
+
+  const filtered = audit.filter(a =>
+    (!typ || a.type===typ) &&
+    (!q   || a.itemName.toLowerCase().includes(q) || a.detail.toLowerCase().includes(q) || a.user.toLowerCase().includes(q))
+  );
+  cnt.textContent = filtered.length+' entries';
+
+  if(!filtered.length){
+    list.innerHTML='<div class="audit-empty">📋 No audit entries yet. Changes to inventory will appear here.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(a => `
+    <div class="audit-entry">
+      <div class="audit-icon ${AUDIT_CLS[a.type]||'ai-edit'}">${AUDIT_ICONS[a.type]||'•'}</div>
+      <div class="audit-body">
+        <div class="audit-action">${esc(a.detail)}</div>
+        <div class="audit-meta">By <b>${esc(a.user)}</b> · ${fmtTime(a.ts)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function clearAudit(){
+  if(!confirm('Clear all audit history? This cannot be undone.')) return;
+  audit = [];
+  saveAll();
+  renderAudit();
+  showToast('Audit log cleared');
+}
+
+// ═══════════════════════════════════════════════
+// TABLE RENDER
+// ═══════════════════════════════════════════════
+function getFiltered(){
+  const q  = document.getElementById('searchInput').value.toLowerCase();
+  const c  = document.getElementById('filterCat').value;
+  const cl = document.getElementById('filterColor').value;
+  const st = document.getElementById('filterStatus').value;
+  return items.filter(it =>
+    (!q  || it.name.toLowerCase().includes(q)||(it.sku||'').toLowerCase().includes(q)||it.cat.toLowerCase().includes(q)||
+             (it.colors||[]).some(h=>{const cn=COLORS.find(x=>x.hex===h);return cn&&cn.name.toLowerCase().includes(q)})) &&
+    (!c  || it.cat===c) &&
+    (!cl || (it.colors||[]).includes(cl)) &&
+    (!st || (st==='low' ? it.stock<=it.thresh : it.stock>it.thresh))
+  );
+}
+
+function renderStats(){
+  const t=items.length, l=items.filter(i=>i.stock<=i.thresh).length;
+  const totalStock = items.reduce((s,i)=>s+i.stock,0);
+  document.getElementById('statsBar').innerHTML=`
+    <div class="stat-card"><div class="num">${t}</div><div class="lbl">Total Items</div></div>
+    <div class="stat-card s-ok"><div class="num">${t-l}</div><div class="lbl">In Stock</div></div>
+    <div class="stat-card s-alert"><div class="num">${l}</div><div class="lbl">Low / Out</div></div>
+    <div class="stat-card s-gold"><div class="num">${totalStock}</div><div class="lbl">Total Units</div></div>`;
+}
+
+function renderCategories(){
+  const cats=[...new Set(items.map(i=>i.cat))].sort();
+  const sel=document.getElementById('filterCat'), cur=sel.value;
+  sel.innerHTML=`<option value="">All Categories</option>`+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+function renderColorFilter(){
+  const allColors=[...new Set(items.flatMap(i=>i.colors||[]))];
+  const sel=document.getElementById('filterColor'), cur=sel.value;
+  sel.innerHTML=`<option value="">All Colors</option>`+
+    allColors.map(h=>{
+      const cn=COLORS.find(x=>x.hex===h);
+      return `<option value="${h}"${h===cur?' selected':''}>${cn?cn.name:h}</option>`;
+    }).join('');
+}
+
+function renderTable(){
+  renderStats(); renderCategories(); renderColorFilter();
+  const filtered=getFiltered();
+  const tbody=document.getElementById('tableBody');
+  if(!filtered.length){
+    tbody.innerHTML=`<tr><td colspan="9" class="empty-cell">🧺 No items found.</td></tr>`;
+    return;
+  }
+  const sorted=[...filtered].sort((a,b)=>{
+    const aL=a.stock<=a.thresh, bL=b.stock<=b.thresh;
+    if(aL&&!bL)return -1; if(!aL&&bL)return 1;
+    return a.name.localeCompare(b.name);
+  });
+  const low=sorted.filter(i=>i.stock<=i.thresh);
+  const ok =sorted.filter(i=>i.stock>i.thresh);
+  let html='';
+  if(low.length){
+    html+=`<tr class="section-row"><td colspan="9">⚠ Needs Restocking — ${low.length} item${low.length>1?'s':''}</td></tr>`;
+    low.forEach(i=>html+=rowHtml(i));
+  }
+  if(ok.length){
+    html+=`<tr class="section-row"><td colspan="9">✓ Well Stocked — ${ok.length} item${ok.length>1?'s':''}</td></tr>`;
+    ok.forEach(i=>html+=rowHtml(i));
+  }
+  tbody.innerHTML=html;
+}
+
+function rowHtml(i){
+  const isLow=i.stock<=i.thresh, sc=isLow?'low':'ok';
+  const pct=Math.min(100,Math.round((i.stock/Math.max(i.thresh*2.5,1))*100));
+  const colors=(i.colors||[]);
+  const colorDots=colors.map(h=>`<span class="color-dot" style="background:${h}" title="${COLORS.find(x=>x.hex===h)?.name||h}"></span>`).join('');
+  const canDel = currentUser && currentUser.canDelete;
+  return `
+  <tr class="row-${sc}">
+    <td><div class="cell-name">
+      <span class="stripe stripe-${sc}"></span>
+      <div class="name-text">
+        <div class="item-name">${esc(i.name)}</div>
+        ${i.sku?`<div class="item-sku">${esc(i.sku)}</div>`:''}
+      </div>
+    </div></td>
+    <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${colorDots||'<span style="font-size:.7rem;color:var(--muted2)">—</span>'}</div></td>
+    <td><span class="tag tag-cat">${esc(i.cat)}</span></td>
+    <td class="c"><span class="tag tag-size">${esc(i.size)}</span></td>
+    <td class="c">
+      <div class="stock-val ${sc}">${i.stock}</div>
+      <div class="mini-bar"><div class="mini-fill fill-${sc}" style="width:${pct}%"></div></div>
+    </td>
+    <td class="c"><span class="thresh-val">${i.thresh}</span></td>
+    <td class="c"><span class="badge badge-${sc}">${isLow?'Low':'OK'}</span></td>
+    <td class="c">
+      <div class="qty-wrap">
+        <button class="qty-btn m" onclick="adj('${i.id}',-1)">−</button>
+        <div class="qty-mid"><input type="number" min="1" value="1" id="qty-${i.id}"></div>
+        <button class="qty-btn p" onclick="adj('${i.id}',1)">+</button>
+      </div>
+    </td>
+    <td class="c">
+      <div class="row-acts">
+        <button class="act-btn" onclick="openModal('${i.id}')">✏ Edit</button>
+        ${canDel?`<button class="act-btn del" onclick="deleteItem('${i.id}')">🗑</button>`:''}
+      </div>
+    </td>
+  </tr>`;
+}
+
+// ═══════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════
+function adj(id, dir){
+  const q=Math.max(1,parseInt(document.getElementById('qty-'+id)?.value)||1);
+  const it=items.find(i=>i.id===id); if(!it)return;
+  const old=it.stock;
+  it.stock=Math.max(0,it.stock+dir*q);
+  const verb=dir>0?'Added':'Removed';
+  addAudit(dir>0?'ADD':'REMOVE', it.name, id,
+    `${verb} ${q} unit${q>1?'s':''} of "${it.name}" (${old} → ${it.stock})`);
+  saveAll(); renderTable(); renderAudit();
+  showToast(dir>0?`+${q} added to ${it.name}`:`-${q} removed from ${it.name}`);
+}
+
+function deleteItem(id){
+  const it=items.find(i=>i.id===id); if(!it)return;
+  if(!confirm(`Delete "${it.name}"?\nThis cannot be undone.`))return;
+  addAudit('DELETE', it.name, id, `Deleted item "${it.name}" (SKU: ${it.sku||'—'})`);
+  items=items.filter(i=>i.id!==id);
+  saveAll(); renderTable(); renderAudit();
+  showToast('Item deleted');
+}
+
+// ═══════════════════════════════════════════════
+// COLOR PICKER
+// ═══════════════════════════════════════════════
+function buildColorPicker(){
+  const wrap=document.getElementById('colorPicker');
+  wrap.innerHTML=COLORS.map(c=>`
+    <div class="color-chip" style="background:${c.hex}" title="${c.name}"
+      onclick="toggleColor('${c.hex}','${c.name}')" id="chip-${c.hex.replace('#','')}"></div>`).join('');
+}
+
+function toggleColor(hex, name){
+  const idx=selectedColors.indexOf(hex);
+  if(idx>=0) selectedColors.splice(idx,1);
+  else selectedColors.push(hex);
+  refreshColorChips();
+}
+
+function refreshColorChips(){
+  COLORS.forEach(c=>{
+    const chip=document.getElementById('chip-'+c.hex.replace('#',''));
+    if(chip) chip.classList.toggle('selected', selectedColors.includes(c.hex));
+  });
+  const list=document.getElementById('selectedColorsList');
+  list.innerHTML=selectedColors.map(h=>{
+    const cn=COLORS.find(x=>x.hex===h);
+    return `<span class="sel-color-tag">
+      <span class="dot" style="background:${h}"></span>
+      ${cn?cn.name:h}
+      <button onclick="toggleColor('${h}','')">×</button>
+    </span>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modalTitle').textContent=id?'Edit Item':'Add New Item';
+  selectedColors=[];
+  if(id){
+    const it=items.find(i=>i.id===id);
+    document.getElementById('fName').value  =it.name;
+    document.getElementById('fSku').value   =it.sku||'';
+    document.getElementById('fCat').value   =it.cat;
+    document.getElementById('fSize').value  =it.size;
+    document.getElementById('fStock').value =it.stock;
+    document.getElementById('fThresh').value=it.thresh;
+    selectedColors=[...(it.colors||[])];
+  } else {
+    ['fName','fSku','fStock','fThresh'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('fCat').value='Shirts';
+    document.getElementById('fSize').value='M';
+  }
+  buildColorPicker();
+  refreshColorChips();
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); editId=null; }
+function handleBgClick(e){ if(e.target===document.getElementById('modalBg'))closeModal(); }
+
+function saveItem(){
+  const name  =document.getElementById('fName').value.trim();
+  const sku   =document.getElementById('fSku').value.trim();
+  const cat   =document.getElementById('fCat').value;
+  const size  =document.getElementById('fSize').value;
+  const stock =parseInt(document.getElementById('fStock').value);
+  const thresh=parseInt(document.getElementById('fThresh').value);
+  if(!name)                   { alert('Please enter an item name.'); return; }
+  if(isNaN(stock)||stock<0)   { alert('Enter a valid stock quantity.'); return; }
+  if(isNaN(thresh)||thresh<1) { alert('Low stock threshold must be ≥ 1.'); return; }
+  const colors=[...selectedColors];
+
+  if(editId){
+    const it=items.find(i=>i.id===editId);
+    const old={...it};
+    Object.assign(it,{name,sku,cat,size,stock,thresh,colors});
+    addAudit('EDIT',name,editId,
+      `Edited "${name}": stock ${old.stock}→${stock}, threshold ${old.thresh}→${thresh}, colors updated`);
+    showToast('Item updated');
+  } else {
+    const newItem={id:uid(),name,sku,cat,size,stock,thresh,colors};
+    items.push(newItem);
+    addAudit('ADD',name,newItem.id,
+      `Added new item "${name}" (SKU: ${sku||'—'}, ${cat}, Size ${size}, Stock: ${stock})`);
+    showToast('Item added');
+  }
+  saveAll(); closeModal(); renderTable(); renderAudit();
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════
+function downloadReport(){
+  if(!items.length){ showToast('No items to export'); return; }
+  const rows=[['SKU','Item Name','Colors','Category','Size','Current Stock','Low Threshold','Status']];
+  items.forEach(i=>rows.push([
+    i.sku||'—', i.name,
+    (i.colors||[]).map(h=>COLORS.find(x=>x.hex===h)?.name||h).join(', '),
+    i.cat, i.size, i.stock, i.thresh,
+    i.stock<=i.thresh?'LOW STOCK':'OK'
+  ]));
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[12,24,20,14,8,14,16,12].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'Inventory');
+
+  // Audit sheet
+  const aRows=[['Time','User','Action','Detail']];
+  audit.forEach(a=>aRows.push([fmtTime(a.ts),a.user,a.type,a.detail]));
+  const ws2=XLSX.utils.aoa_to_sheet(aRows);
+  ws2['!cols']=[18,12,10,50].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws2,'Audit Log');
+
+  const low=items.filter(i=>i.stock<=i.thresh);
+  const ws3=XLSX.utils.aoa_to_sheet([
+    ['ThreadCount — Inventory Report'],['Generated',new Date().toLocaleString()],[],
+    ['Total Items',items.length],['Well Stocked',items.length-low.length],['Low / Out',low.length],[],
+    ['--- LOW STOCK ---'],['Item Name','Stock','Threshold'],
+    ...low.map(i=>[i.name,i.stock,i.thresh])
+  ]);
+  ws3['!cols']=[28,10,12].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws3,'Summary');
+
+  XLSX.writeFile(wb,`ThreadCount_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('Report exported (3 sheets)!');
+}
+
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='audit') renderAudit();
+}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// Pre-fill login fields
+document.getElementById('loginUser').value='admin';
+document.getElementById('loginPass').value='admin123';
+</script>
+</body>
+</html>
