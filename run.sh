@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "========================================"
+echo "  ThreadCount — Inventory System"
+echo "========================================"
+echo ""
+echo "Starting server at http://localhost:8000"
+echo ""
+echo "Default logins:"
+echo "  Admin:  admin / admin123"
+echo "  Staff:  staff / staff123"
+echo ""
+echo "Press Ctrl+C to stop."
+echo "========================================"
+cd "$(dirname "$0")"
+python manage.py runserver 0.0.0.0:8000

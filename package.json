@@ -1,0 +1,22 @@
+{
+  "name": "inventory-jain",
+  "version": "1.0.0",
+  "description": "ThreadCount Inventory System - Cloud Deployment",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Building for Vercel'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3",
+    "@vercel/postgres": "^0.4.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
