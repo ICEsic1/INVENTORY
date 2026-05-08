@@ -1,22 +1,24 @@
 @echo off
-echo 🚀 Deploying Inventory System to Vercel...
+echo 🚀 ThreadCount Cloud Deployment to Vercel
 echo.
 
-echo 📦 Pushing to GitHub...
+echo Pushing code to GitHub...
 git add .
-git commit -m "Deploy to Vercel" --allow-empty
+git commit -m "Cloud deployment" --allow-empty
 git push origin main
+
+echo.
 echo ✅ Code pushed to GitHub
 echo.
-
-echo 🌐 Go to https://vercel.com/new and import your GitHub repo
-echo 📝 Set these environment variables in Vercel:
-echo    DATABASE_URL=postgresql://user:pass@host:5432/db
-echo    JWT_SECRET=your-secret-key-here
+echo 🌐 Next steps:
+echo    1. Go to https://vercel.com/new
+echo    2. Import your GitHub repo
+echo    3. Add environment variables:
+echo       - DATABASE_URL=your_postgresql_connection_string
+echo       - JWT_SECRET=your_random_secret_key
+echo    4. Click Deploy
 echo.
-
-echo 🎯 After deployment, initialize database:
-echo    curl https://your-app.vercel.app/api/db-init
+echo 📚 See VERCEL_SETUP.md for detailed instructions
 echo.
 
 echo 🎉 Deployment complete! Your inventory system is now live on Vercel.

@@ -1,59 +1,50 @@
-# ThreadCount — Clothing Inventory System
+# ThreadCount — Cloud Inventory System
 
-A Node.js cloud inventory management system deployed on Vercel with PostgreSQL backend.
+A Node.js serverless inventory management system on Vercel with PostgreSQL.
 
-## Quick Start
+## 🚀 Deploy to Cloud
 
-### Local Development
-```bash
-npm install
-npm run dev
-```
-
-### Cloud Deployment
 ```bash
 npm run deploy
 ```
 
-Then open https://your-vercel-app.vercel.app
+See [VERCEL_SETUP.md](VERCEL_SETUP.md) for complete deployment guide.
 
-## Setup Requirements
+## 📋 Features
 
-1. **Environment Variables** (.env.local)
+- **Inventory Management** — Add/edit/delete items with real-time tracking
+- **Audit Logs** — Complete history of all actions
+- **Task Management** — Kanban-style tasks with status tracking
+- **JWT Authentication** — Secure role-based access (admin/staff)
+- **Serverless** — Auto-scaling on Vercel with PostgreSQL
+
+## 🏗️ Architecture
+
 ```
-DATABASE_URL=your_postgres_connection_string
-JWT_SECRET=your_secret_key
-```
-
-2. **Database** — PostgreSQL (auto-initialized on first request)
-
-## Features
-- **Inventory Management** — Add/edit/delete items with color tags, real-time quantity tracking
-- **Audit History** — Complete audit logs for all actions with timestamp and user
-- **Task Management** — Kanban-style task board with status tracking
-- **User Authentication** — JWT-based auth with role-based access (admin/staff)
-- **Cloud-Ready** — Deployed on Vercel with serverless API endpoints
-
-## Architecture
-```
-├── index.html           # Single-page app frontend
+├── index.html           # Cloud UI
 ├── api/
-│   ├── auth.js          # Login, signup, token verification
-│   ├── inventory.js     # CRUD for inventory items
-│   ├── tasks.js         # CRUD for tasks
-│   ├── audit-logs.js    # Audit trail retrieval
-│   ├── db-init.js       # Database schema initialization
-│   └── setup.js         # Configuration endpoints
-├── vercel.json          # Vercel deployment config
-└── package.json         # Dependencies and scripts
+│   ├── auth.js          # Login, signup, verify
+│   ├── inventory.js     # Item management
+│   ├── tasks.js         # Task management
+│   ├── audit-logs.js    # Audit history
+│   └── setup.js         # Database init
+├── vercel.json          # Deployment config
+└── package.json         # Dependencies
 ```
 
-## Roles
-- **Admin**: Full access to all features
-- **Staff**: Can manage inventory and tasks
+## 💾 Database
 
-## Database Tables
-- `users` — User accounts with hashed passwords
-- `inventory` — Inventory items with tags
-- `tasks` — Task management with status
-- `audit_logs` — Complete action history
+PostgreSQL with auto-initialized tables:
+- `users` — User accounts
+- `inventory` — Stock items
+- `tasks` — Task board
+- `audit_logs` — Action history
+
+## 👥 Users
+
+- **Admin** — Full system access
+- **Staff** — Inventory and task management
+
+---
+
+**Deployment:** See [VERCEL_SETUP.md](VERCEL_SETUP.md) | **Live:** [inventory-jain.vercel.app](https://inventory-jain.vercel.app)

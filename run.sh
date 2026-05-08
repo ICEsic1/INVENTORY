@@ -1,11 +1,14 @@
 #!/bin/bash
+# ThreadCount Cloud Inventory System
+# This is a cloud-based application deployed on Vercel
+# For deployment, see VERCEL_SETUP.md
+
 echo "========================================"
-echo "  ThreadCount — Inventory System"
+echo "  ThreadCount — Cloud System"
 echo "========================================"
 echo ""
-echo "Starting development server at http://localhost:3000"
+echo "ℹ️  This app runs on Vercel (serverless)"
+echo "📚 See VERCEL_SETUP.md for deployment"
 echo ""
-echo "Press Ctrl+C to stop."
+echo "Deploy with: npm run deploy"
 echo "========================================"
-cd "$(dirname "$0")"
-npm run dev
