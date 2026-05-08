@@ -1,0 +1,10 @@
+.git
+.gitignore
+README.md
+CLOUD_README.md
+VERCEL_SETUP.md
+deploy.bat
+run.sh
+.env.local
+.vscode
+.git
