@@ -4,7 +4,8 @@
   "description": "ThreadCount Inventory System - Cloud Deployment",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'Building for Vercel'",
+    "build": "npm run bundle",
+    "bundle": "echo 'Static files and API ready'",
     "deploy": "vercel --prod"
   },
   "dependencies": {
@@ -17,6 +18,6 @@
     "vercel": "^32.0.0"
   },
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   }
 }
