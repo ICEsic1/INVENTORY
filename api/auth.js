@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createPool } = require('@vercel/postgres');
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -95,6 +95,13 @@ export default async function handler(req, res) {
     }
 
   } catch (error) {
+    try {
+      await client.release();
+    } catch (e) {
+      // client may have already been released
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
+module.exports = handler;

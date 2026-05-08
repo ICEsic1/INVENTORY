@@ -1,6 +1,6 @@
 # ThreadCount — Cloud Inventory System
 
-A Django-powered inventory management system deployed on **Vercel** with cloud database.
+A Node.js serverless inventory management system deployed on **Vercel** with PostgreSQL backend.
 
 ## 🚀 Live Demo
 
@@ -8,45 +8,49 @@ Your app will be available at: `https://inventory-jain.vercel.app`
 
 ## 📋 Features
 
-- ✅ **Cloud Database** — PostgreSQL on Vercel/Supabase
-- ✅ **Serverless API** — Auto-scaling Vercel functions
-- ✅ **JWT Authentication** — Secure user login
+- ✅ **Cloud Database** — PostgreSQL on Vercel Postgres / Supabase
+- ✅ **Serverless API** — Auto-scaling Vercel functions (Node.js)
+- ✅ **JWT Authentication** — Secure token-based user login
 - ✅ **Real-time Sync** — Instant updates across devices
-- ✅ **Audit Trail** — All actions logged
-- ✅ **Multi-user** — Admin & staff roles
+- ✅ **Audit Trail** — Complete action history logging
+- ✅ **Multi-user** — Admin & staff role-based access
 
 ## 🛠️ API Endpoints
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| POST | `/api/auth` | Login/Signup |
-| GET | `/api/inventory` | Get items |
-| POST | `/api/inventory` | Add item |
+| POST | `/api/auth` | Login/Signup/Verify Token |
+| GET | `/api/inventory` | Get all items |
+| POST | `/api/inventory` | Add new item |
 | PUT | `/api/inventory` | Update item |
 | DELETE | `/api/inventory?id=1` | Delete item |
-| GET | `/api/tasks` | Get tasks |
+| GET | `/api/tasks` | Get all tasks |
+| POST | `/api/tasks` | Create task |
+| PUT | `/api/tasks` | Update task |
+| DELETE | `/api/tasks?id=1` | Delete task |
 | GET | `/api/audit-logs` | Get audit history |
+| POST | `/api/setup?action=init-db` | Initialize database |
 
 ## 🔧 Setup
 
 1. **Deploy to Vercel:**
    ```bash
-   ./deploy.bat
+   npm run deploy
    ```
 
-2. **Set Environment Variables:**
-   - `DATABASE_URL`: Your PostgreSQL connection string
-   - `JWT_SECRET`: Random secret key (32+ chars)
+2. **Set Environment Variables in Vercel Dashboard:**
+   - `DATABASE_URL`: PostgreSQL connection string (postgresql://...)
+   - `JWT_SECRET`: Random secret key (minimum 32 characters)
 
 3. **Initialize Database:**
    ```bash
-   curl https://your-app.vercel.app/api/db-init
+   curl https://your-app.vercel.app/api/setup?action=init-db
    ```
 
 ## 📱 Usage
 
 ```javascript
-// Initialize API
+// Initialize API client
 const api = new InventoryAPI('https://your-app.vercel.app');
 
 // Login

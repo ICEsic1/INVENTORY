@@ -1,39 +1,59 @@
 # ThreadCount — Clothing Inventory System
 
-A Django-powered inventory management system with Kanban task board and calendar.
+A Node.js cloud inventory management system deployed on Vercel with PostgreSQL backend.
 
 ## Quick Start
 
+### Local Development
 ```bash
-cd threadcount
-pip install django
-python run.sh        # or: python manage.py runserver 0.0.0.0:8000
+npm install
+npm run dev
 ```
-Then open http://localhost:8000
 
-## Default Accounts
-| Username | Password | Role |
-|----------|----------|------|
-| admin    | admin123 | Admin |
-| staff    | staff123 | Staff |
+### Cloud Deployment
+```bash
+npm run deploy
+```
+
+Then open https://your-vercel-app.vercel.app
+
+## Setup Requirements
+
+1. **Environment Variables** (.env.local)
+```
+DATABASE_URL=your_postgres_connection_string
+JWT_SECRET=your_secret_key
+```
+
+2. **Database** — PostgreSQL (auto-initialized on first request)
 
 ## Features
-- **Inventory** — Add/edit/delete items with color tags, stock tracking, low-stock alerts
-- **Audit History** — Every action is logged with timestamp and user
-- **Tasks & Calendar** — Asana-style Kanban board + monthly calendar view
-- **Account Management** — Admin can create/delete staff accounts (Staff cannot delete)
-- **Excel Export** — One-click .xlsx export with inventory + audit sheets
+- **Inventory Management** — Add/edit/delete items with color tags, real-time quantity tracking
+- **Audit History** — Complete audit logs for all actions with timestamp and user
+- **Task Management** — Kanban-style task board with status tracking
+- **User Authentication** — JWT-based auth with role-based access (admin/staff)
+- **Cloud-Ready** — Deployed on Vercel with serverless API endpoints
 
-## Structure
+## Architecture
 ```
-threadcount/
-├── accounts/     # User model, auth (login/logout/create/delete)
-├── inventory/    # Items, AuditLog, Task models + all views
-├── templates/    # HTML templates
-├── db.sqlite3    # SQLite database (auto-created)
-└── run.sh        # Start script
+├── index.html           # Single-page app frontend
+├── api/
+│   ├── auth.js          # Login, signup, token verification
+│   ├── inventory.js     # CRUD for inventory items
+│   ├── tasks.js         # CRUD for tasks
+│   ├── audit-logs.js    # Audit trail retrieval
+│   ├── db-init.js       # Database schema initialization
+│   └── setup.js         # Configuration endpoints
+├── vercel.json          # Vercel deployment config
+└── package.json         # Dependencies and scripts
 ```
 
 ## Roles
-- **Admin**: Full access — create/delete accounts, delete items/tasks, view all
-- **Staff**: Can add/edit items and tasks, adjust stock, but cannot delete accounts or items
+- **Admin**: Full access to all features
+- **Staff**: Can manage inventory and tasks
+
+## Database Tables
+- `users` — User accounts with hashed passwords
+- `inventory` — Inventory items with tags
+- `tasks` — Task management with status
+- `audit_logs` — Complete action history

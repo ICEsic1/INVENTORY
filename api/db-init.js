@@ -3,7 +3,7 @@
 
 const { createPool } = require('@vercel/postgres');
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     const pool = createPool({
       connectionString: process.env.DATABASE_URL,
@@ -76,3 +76,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+module.exports = handler;
