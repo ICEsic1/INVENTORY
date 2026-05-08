@@ -17,12 +17,14 @@ async function handler(req, res) {
   }
 
   const pool = createPool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
   });
 
+  let client;
   try {
     const { action, email, password, role } = req.body;
-    const client = await pool.connect();
+    client = await pool.connect();
 
     if (action === 'signup') {
       const hashedPassword = await bcrypt.hash(password, 10);

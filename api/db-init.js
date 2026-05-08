@@ -9,7 +9,7 @@ async function handler(req, res) {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }
     });
-    const client = await pool.connect();
+    let client = await pool.connect();
 
     // Create inventory table
     await client.query(`

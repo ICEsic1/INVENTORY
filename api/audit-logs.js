@@ -35,11 +35,13 @@ async function handler(req, res) {
   }
 
   const pool = createPool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
   });
 
+  let client;
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
     const limit = req.query.limit || 100;
 
     const result = await client.query(
@@ -51,6 +53,7 @@ async function handler(req, res) {
     res.status(200).json({ success: true, logs: result.rows });
 
   } catch (error) {
+    if (client) try { client.release(); } catch (e) {}
     res.status(500).json({ success: false, error: error.message });
   }
 }

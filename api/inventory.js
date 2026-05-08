@@ -31,11 +31,13 @@ async function handler(req, res) {
   }
 
   const pool = createPool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
   });
 
+  let client;
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
 
     if (req.method === 'GET') {
       const result = await client.query('SELECT * FROM inventory ORDER BY created_at DESC');
@@ -91,6 +93,7 @@ async function handler(req, res) {
     }
 
   } catch (error) {
+    if (client) try { client.release(); } catch (e) {}
     res.status(500).json({ success: false, error: error.message });
   }
 }
