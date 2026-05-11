@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPD/THE PRINTING DEPOT — Inventory</title>
+<title>THE PRINTING DEPOT — Inventory</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -275,7 +275,7 @@ tbody td:first-child{padding-left:18px}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">
-      <h1>TPD/THE PRINTING DEPOT</h1>
+      <h1>THE PRINTING DEPOT</h1>
       <p>Inventory System</p>
     </div>
     <label class="login-label">Username</label>
@@ -312,7 +312,7 @@ tbody td:first-child{padding-left:18px}
   <div class="header">
     <div class="header-inner">
       <div>
-        <h1>TPD/THE PRINTING DEPOT</h1>
+        <h1>THE PRINTING DEPOT</h1>
         <div class="header-sub">Inventory Management</div>
       </div>
       <div class="header-right">
@@ -552,7 +552,7 @@ async function cloudSave(){
       setCloudStatus('syncing');
       const r = await fetch('https://api.jsonbin.io/v3/b',{
         method:'POST',
-        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'tpd-inventory'},
+        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'printing-depot-inventory'},
         body: JSON.stringify({items,audit})
       });
       if(!r.ok) throw new Error(r.status);
@@ -936,7 +936,7 @@ function downloadReport(){
 
   const low=items.filter(i=>i.stock<=i.thresh);
   const ws3=XLSX.utils.aoa_to_sheet([
-    ['TPD/THE PRINTING DEPOT — Inventory Report'],['Generated',new Date().toLocaleString()],[],
+    ['THE PRINTING DEPOT — Inventory Report'],['Generated',new Date().toLocaleString()],[],
     ['Total Items',items.length],['Well Stocked',items.length-low.length],['Low / Out',low.length],[],
     ['--- LOW STOCK ---'],['Item Name','Stock','Threshold'],
     ...low.map(i=>[i.name,i.stock,i.thresh])
@@ -944,7 +944,7 @@ function downloadReport(){
   ws3['!cols']=[28,10,12].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws3,'Summary');
 
-  XLSX.writeFile(wb,`TPD_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb,`PrintingDepot_${new Date().toISOString().slice(0,10)}.xlsx`);
   showToast('Report exported (3 sheets)!');
 }
 
