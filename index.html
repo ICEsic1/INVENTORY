@@ -118,6 +118,38 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
 .btn-plain{background:var(--surface);color:var(--ink);border:1.5px solid var(--border)}.btn-plain:hover{border-color:var(--ink)}
 .btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b91c1c}
 
+.cloud-setup{margin-top:16px}
+.cloud-toggle{
+  font-size:.75rem;color:var(--muted);text-align:center;cursor:pointer;
+  text-decoration:underline;display:block;margin-bottom:10px;
+}
+.cloud-panel{display:none;background:#f4f4f5;border-radius:8px;padding:12px}
+.cloud-panel.open{display:block}
+.cloud-panel label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px;margin-top:8px}
+.cloud-panel label:first-child{margin-top:0}
+.cloud-panel input{
+  width:100%;padding:7px 10px;border-radius:6px;border:1.5px solid var(--border);
+  font-size:.78rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);background:#fff;
+}
+.cloud-panel input:focus{border-color:#000000}
+.cloud-save-btn{
+  margin-top:10px;width:100%;padding:8px;border-radius:6px;border:none;
+  background:var(--ink);color:#fff;font-size:.75rem;font-weight:700;
+  font-family:'Nunito',sans-serif;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* Cloud status */
+.cloud-status{
+  display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;
+  padding:4px 10px;border-radius:20px;letter-spacing:.04em;
+}
+.cloud-status.ok{background:#dcfce7;color:#15803d}
+.cloud-status.local{background:#fef9c3;color:#854d0e}
+.cloud-status.syncing{background:#e0f2fe;color:#0369a1}
+.cloud-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:none}
+.cloud-status.syncing .cloud-dot{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
 /* ═══ TABLE ═══ */
 .scroll-hint{font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:4px;display:none}
 @media(max-width:680px){.scroll-hint{display:block}}
@@ -259,6 +291,19 @@ tbody td:first-child{padding-left:18px}
       Admin: <b>admin</b> / <b>admin123</b><br>
       Staff: <b>staff</b> / <b>staff123</b>
     </div>
+    <div class="cloud-setup">
+      <span class="cloud-toggle" onclick="toggleCloudPanel()">⚙ Configure JSONBin Cloud Storage</span>
+      <div class="cloud-panel" id="cloudPanel">
+        <label>JSONBin API Key (X-Master-Key)</label>
+        <input type="text" id="cfgApiKey" placeholder="$2a$10$...">
+        <label>Bin ID (leave blank to auto-create)</label>
+        <input type="text" id="cfgBinId" placeholder="6123abc...">
+        <button class="cloud-save-btn" onclick="saveCloudConfig()">Save & Connect</button>
+        <div style="margin-top:8px;font-size:.7rem;color:#666;line-height:1.5">
+          Get a free key at <b>jsonbin.io</b> → API Keys. Data syncs across devices when configured.
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -273,6 +318,7 @@ tbody td:first-child{padding-left:18px}
         <div class="header-sub">Inventory Management</div>
       </div>
       <div class="header-right">
+        <span id="cloudStatus" class="cloud-status local"><span class="cloud-dot"></span> Local</span>
         <div class="user-pill">
           <div class="user-avatar" id="userAvatar">A</div>
           <span id="userLabel">Admin</span>
@@ -435,6 +481,9 @@ let audit = [];
 let selectedColors = [];   // for modal
 let editId = null;
 
+// Cloud config
+let cloudCfg = JSON.parse(localStorage.getItem('tc_cloud') || 'null') || { apiKey:'', binId:'' };
+
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -462,12 +511,80 @@ function defaultItems(){
   ];
 }
 
+// ═══════════════════════════════════════════════
+// CLOUD (JSONBin.io)
+// ═══════════════════════════════════════════════
+function setCloudStatus(state){
+  const el = document.getElementById('cloudStatus');
+  el.className = 'cloud-status '+state;
+  el.innerHTML = {
+    ok:      '<span class="cloud-dot"></span> Cloud Synced',
+    local:   '<span class="cloud-dot"></span> Local Only',
+    syncing: '<span class="cloud-dot"></span> Syncing…',
+    error:   '<span class="cloud-dot"></span> Sync Error',
+  }[state] || '';
+}
+
+async function cloudLoad(){
+  if(!cloudCfg.apiKey || !cloudCfg.binId) return false;
+  setCloudStatus('syncing');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}/latest`,{
+      headers:{'X-Master-Key':cloudCfg.apiKey}
+    });
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if(d.record){
+      if(d.record.items)  items = d.record.items;
+      if(d.record.audit)  audit = d.record.audit;
+    }
+    setCloudStatus('ok');
+    return true;
+  } catch(e){
+    setCloudStatus('error');
+    return false;
+  }
+}
+
+async function cloudSave(){
+  if(!cloudCfg.apiKey) return;
+  // Auto-create bin if needed
+  if(!cloudCfg.binId){
+    try {
+      setCloudStatus('syncing');
+      const r = await fetch('https://api.jsonbin.io/v3/b',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'printing-depot-inventory'},
+        body: JSON.stringify({items,audit})
+      });
+      if(!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      cloudCfg.binId = d.metadata.id;
+      localStorage.setItem('tc_cloud', JSON.stringify(cloudCfg));
+      document.getElementById('cfgBinId').value = cloudCfg.binId;
+      setCloudStatus('ok');
+    } catch(e){ setCloudStatus('error'); }
+    return;
+  }
+  try {
+    setCloudStatus('syncing');
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey},
+      body: JSON.stringify({items,audit})
+    });
+    if(!r.ok) throw new Error(r.status);
+    setCloudStatus('ok');
+  } catch(e){ setCloudStatus('error'); }
+}
+
 function saveAll(){
   saveLocal();
+  cloudSave();
 }
 
 // ═══════════════════════════════════════════════
-// AUDIT LOG
+// AUTH
 // ═══════════════════════════════════════════════
 function doLogin(){
   const u = document.getElementById('loginUser').value.trim();
@@ -484,8 +601,11 @@ function doLogin(){
   document.getElementById('userLabel').textContent   = acct.role+': '+u;
   addAudit('LOGIN','System','',`${acct.role} "${u}" signed in`);
   loadLocal();
-  renderTable();
-  renderAudit();
+  cloudLoad().then(fromCloud => {
+    if(!fromCloud) setCloudStatus('local');
+    renderTable();
+    renderAudit();
+  });
 }
 
 function doLogout(){
@@ -497,6 +617,25 @@ function doLogout(){
   document.getElementById('loginPass').value='';
 }
 
+function toggleCloudPanel(){
+  const p = document.getElementById('cloudPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    document.getElementById('cfgApiKey').value = cloudCfg.apiKey||'';
+    document.getElementById('cfgBinId').value  = cloudCfg.binId||'';
+  }
+}
+
+function saveCloudConfig(){
+  cloudCfg.apiKey = document.getElementById('cfgApiKey').value.trim();
+  cloudCfg.binId  = document.getElementById('cfgBinId').value.trim();
+  localStorage.setItem('tc_cloud', JSON.stringify(cloudCfg));
+  showToast('Cloud config saved!');
+  document.getElementById('cloudPanel').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// AUDIT LOG
 // ═══════════════════════════════════════════════
 // AUDIT LOG
 // ═══════════════════════════════════════════════
