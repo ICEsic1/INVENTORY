@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ThreadCount — Inventory</title>
+<title>TPD/THE PRINTING DEPOT — Inventory</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --ink:#18181b; --bg:#f8f7f4; --surface:#ffffff; --border:#e4e0d8;
-  --gold:#c9922a; --gold-light:#fdf3e3; --gold-dark:#a87520;
+  --ink:#000000; --bg:#ffffff; --surface:#ffffff; --border:#000000;
+  --gold:#000000; --gold-light:#f5f5f5; --gold-dark:#333333;
   --red:#dc2626; --red-light:#fef2f2; --red-row:#fff5f5;
   --green:#16a34a; --green-light:#f0fdf4; --green-row:#f7fdf9;
   --muted:#71717a; --muted2:#a1a1aa;
@@ -22,35 +22,35 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
 
 /* ═══ LOGIN SCREEN ═══ */
 #loginScreen{
-  position:fixed;inset:0;background:linear-gradient(135deg,#18181b 0%,#27272a 50%,#1a1208 100%);
+  position:fixed;inset:0;background:linear-gradient(135deg,#000000 0%,#1a1a1a 50%,#000000 100%);
   display:flex;align-items:center;justify-content:center;z-index:1000;
 }
 .login-box{
   background:var(--surface);border-radius:20px;padding:40px 36px 36px;
   width:100%;max-width:380px;box-shadow:var(--shadow-lg);
-  border-top:4px solid var(--gold);
+  border-top:4px solid #000000;
 }
 .login-logo{text-align:center;margin-bottom:28px}
 .login-logo h1{font-size:2rem;color:var(--ink)}
-.login-logo p{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:4px;font-family:'Nunito',sans-serif;font-weight:700}
+.login-logo p{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:#000000;margin-top:4px;font-family:'Nunito',sans-serif;font-weight:700}
 .login-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
 .login-input{
   width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);
   font-size:.9rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);
   background:var(--bg);margin-bottom:14px;transition:border-color .15s;
 }
-.login-input:focus{border-color:var(--gold)}
+.login-input:focus{border-color:#000000}
 .login-btn{
   width:100%;padding:13px;border-radius:9px;border:none;
-  background:var(--gold);color:#fff;font-size:.88rem;font-weight:700;
+  background:#000000;color:#fff;font-size:.88rem;font-weight:700;
   font-family:'Nunito',sans-serif;cursor:pointer;letter-spacing:.04em;
   text-transform:uppercase;transition:background .15s;margin-top:4px;
 }
-.login-btn:hover{background:var(--gold-dark)}
+.login-btn:hover{background:#333333}
 .login-err{color:var(--red);font-size:.8rem;text-align:center;margin-top:10px;min-height:20px;font-weight:600}
 .login-hint{
-  background:var(--gold-light);border:1px solid #f0d090;border-radius:8px;
-  padding:10px 14px;margin-top:18px;font-size:.75rem;color:#7a5c10;line-height:1.5;
+  background:#f0f0f0;border:1px solid #cccccc;border-radius:8px;
+  padding:10px 14px;margin-top:18px;font-size:.75rem;color:#333333;line-height:1.5;
 }
 .login-hint strong{display:block;margin-bottom:3px;font-size:.73rem;letter-spacing:.06em;text-transform:uppercase}
 .cloud-setup{margin-top:16px}
@@ -66,7 +66,7 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
   width:100%;padding:7px 10px;border-radius:6px;border:1.5px solid var(--border);
   font-size:.78rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);background:#fff;
 }
-.cloud-panel input:focus{border-color:var(--gold)}
+.cloud-panel input:focus{border-color:#000000}
 .cloud-save-btn{
   margin-top:10px;width:100%;padding:8px;border-radius:6px;border:none;
   background:var(--ink);color:#fff;font-size:.75rem;font-weight:700;
@@ -76,20 +76,20 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
 /* ═══ APP LAYOUT ═══ */
 #app{display:none}
 .header{
-  background:var(--ink);color:#fff;
+  background:#000000;color:#fff;
   padding:14px 20px 12px;position:sticky;top:0;z-index:100;
-  border-bottom:3px solid var(--gold);
+  border-bottom:3px solid #000000;
 }
 .header-inner{max-width:1040px;margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .header h1{font-size:1.45rem;letter-spacing:-.02em;line-height:1;color:#fff}
-.header-sub{font-size:.68rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:1px}
+.header-sub{font-size:.68rem;color:#000000;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:1px}
 .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .user-pill{
   display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);
   border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:5px 12px 5px 8px;
   font-size:.75rem;font-weight:600;color:#fff;
 }
-.user-avatar{width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
+.user-avatar{width:22px;height:22px;background:#000000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
 
 /* ═══ TABS ═══ */
 .tabs{background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:66px;z-index:90}
@@ -100,7 +100,7 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
   cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
   font-family:'Nunito',sans-serif;transition:all .15s;margin-bottom:-2px;
 }
-.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-btn.active{color:#000000;border-bottom-color:#000000}
 .tab-btn:hover:not(.active){color:var(--ink)}
 
 /* ═══ MAIN ═══ */
@@ -115,14 +115,14 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
 .stat-card .lbl{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:700}
 .stat-card.s-alert .num{color:var(--red)}
 .stat-card.s-ok    .num{color:var(--green)}
-.stat-card.s-gold  .num{color:var(--gold)}
+.stat-card.s-gold  .num{color:#000000}
 
 /* Toolbar */
 .toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .srch{flex:1;min-width:140px;padding:9px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.84rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink)}
-.srch:focus{border-color:var(--gold)}
+.srch:focus{border-color:#000000}
 .fsel{padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.77rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);cursor:pointer}
-.fsel:focus{border-color:var(--gold)}
+.fsel:focus{border-color:#000000}
 
 /* Buttons */
 .btn{
@@ -130,7 +130,7 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
   font-size:.77rem;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;
   transition:all .15s;font-family:'Nunito',sans-serif;text-transform:uppercase;white-space:nowrap;
 }
-.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-dark)}
+.btn-gold{background:#000000;color:#fff}.btn-gold:hover{background:#333333}
 .btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{background:#27272a}
 .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.22)}.btn-ghost:hover{background:rgba(255,255,255,.2)}
 .btn-plain{background:var(--surface);color:var(--ink);border:1.5px solid var(--border)}.btn-plain:hover{border-color:var(--ink)}
@@ -154,8 +154,8 @@ h1,h2,h3,.serif{font-family:'Playfair Display',serif}
 .table-wrap{background:var(--surface);border-radius:12px;box-shadow:var(--shadow);border:1.5px solid var(--border);overflow:hidden}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead tr{background:var(--ink)}
-thead th{padding:11px 14px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+thead tr{background:#000000}
+thead th{padding:11px 14px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ffffff;white-space:nowrap}
 thead th.c{text-align:center}
 thead th:first-child{padding-left:18px}
 tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
@@ -228,7 +228,7 @@ tbody td:first-child{padding-left:18px}
 .form-group{margin-bottom:13px}
 .form-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800;display:block;margin-bottom:5px}
 .form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.88rem;font-family:'Nunito',sans-serif;outline:none;color:var(--ink);transition:border-color .15s}
-.form-input:focus,.form-select:focus{border-color:var(--gold)}
+.form-input:focus,.form-select:focus{border-color:#000000}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modal-btns{display:flex;gap:10px;margin-top:18px}
 .modal-btns .btn{flex:1;justify-content:center;padding:12px}
@@ -245,8 +245,8 @@ tbody td:first-child{padding-left:18px}
 
 /* ═══ AUDIT LOG ═══ */
 .audit-wrap{background:var(--surface);border-radius:12px;box-shadow:var(--shadow);border:1.5px solid var(--border);overflow:hidden}
-.audit-head{background:var(--ink);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.audit-head h3{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-family:'Nunito',sans-serif;font-weight:800}
+.audit-head{background:#000000;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.audit-head h3{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800}
 .audit-list{max-height:520px;overflow-y:auto}
 .audit-entry{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .1s}
 .audit-entry:last-child{border-bottom:none}
@@ -275,7 +275,7 @@ tbody td:first-child{padding-left:18px}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">
-      <h1>ThreadCount</h1>
+      <h1>TPD/THE PRINTING DEPOT</h1>
       <p>Inventory System</p>
     </div>
     <label class="login-label">Username</label>
@@ -312,8 +312,8 @@ tbody td:first-child{padding-left:18px}
   <div class="header">
     <div class="header-inner">
       <div>
-        <h1>ThreadCount</h1>
-        <div class="header-sub">Clothing Inventory</div>
+        <h1>TPD/THE PRINTING DEPOT</h1>
+        <div class="header-sub">Inventory Management</div>
       </div>
       <div class="header-right">
         <span id="cloudStatus" class="cloud-status local"><span class="cloud-dot"></span> Local</span>
@@ -552,7 +552,7 @@ async function cloudSave(){
       setCloudStatus('syncing');
       const r = await fetch('https://api.jsonbin.io/v3/b',{
         method:'POST',
-        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'threadcount-inventory'},
+        headers:{'Content-Type':'application/json','X-Master-Key':cloudCfg.apiKey,'X-Bin-Name':'tpd-inventory'},
         body: JSON.stringify({items,audit})
       });
       if(!r.ok) throw new Error(r.status);
@@ -936,7 +936,7 @@ function downloadReport(){
 
   const low=items.filter(i=>i.stock<=i.thresh);
   const ws3=XLSX.utils.aoa_to_sheet([
-    ['ThreadCount — Inventory Report'],['Generated',new Date().toLocaleString()],[],
+    ['TPD/THE PRINTING DEPOT — Inventory Report'],['Generated',new Date().toLocaleString()],[],
     ['Total Items',items.length],['Well Stocked',items.length-low.length],['Low / Out',low.length],[],
     ['--- LOW STOCK ---'],['Item Name','Stock','Threshold'],
     ...low.map(i=>[i.name,i.stock,i.thresh])
@@ -944,7 +944,7 @@ function downloadReport(){
   ws3['!cols']=[28,10,12].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws3,'Summary');
 
-  XLSX.writeFile(wb,`ThreadCount_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb,`TPD_${new Date().toISOString().slice(0,10)}.xlsx`);
   showToast('Report exported (3 sheets)!');
 }
 
