@@ -292,14 +292,14 @@ tbody td:first-child{padding-left:18px}
       Staff: <b>staff</b> / <b>staff123</b>
     </div>
     <div class="cloud-setup">
-      <span class="cloud-toggle" onclick="toggleCloudPanel()">⚙ Configure JSONBin Cloud Storage</span>
-      <div class="cloud-panel" id="cloudPanel">
+      <span class=\"cloud-toggle\" onclick=\"toggleCloudPanel()\">⚙ Configure JSONBin Cloud Storage</span>
+      <div class=\"cloud-panel\" id=\"cloudPanel\">
         <label>JSONBin API Key (X-Master-Key)</label>
-        <input type="text" id="cfgApiKey" placeholder="$2a$10$...">
+        <input type=\"text\" id=\"cfgApiKey\" placeholder=\"$2a$10$...\">
         <label>Bin ID (leave blank to auto-create)</label>
-        <input type="text" id="cfgBinId" placeholder="6123abc...">
-        <button class="cloud-save-btn" onclick="saveCloudConfig()">Save & Connect</button>
-        <div style="margin-top:8px;font-size:.7rem;color:#666;line-height:1.5">
+        <input type=\"text\" id=\"cfgBinId\" placeholder=\"6123abc...\">
+        <button class=\"cloud-save-btn\" onclick=\"saveCloudConfig()\">Save & Connect</button>
+        <div style=\"margin-top:8px;font-size:.7rem;color:#666;line-height:1.5\">
           Get a free key at <b>jsonbin.io</b> → API Keys. Data syncs across devices when configured.
         </div>
       </div>
@@ -482,7 +482,7 @@ let selectedColors = [];   // for modal
 let editId = null;
 
 // Cloud config
-let cloudCfg = JSON.parse(localStorage.getItem('tc_cloud') || 'null') || { apiKey:'', binId:'' };
+let cloudCfg = JSON.parse(localStorage.getItem('tc_cloud') || 'null') || { apiKey:'$2a$10$jFHVHKZ96CpDInsvpn8AnuIzLDIAv7ytdCq3OlJiO/uciUCXtc.Cm', binId:'' };
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
