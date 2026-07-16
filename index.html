@@ -471,8 +471,61 @@ function defaultItems(){
   ];
 }
 
+const CLOUD_ENDPOINT = '/api/shared-cloud';
+
+function setCloudStatus(state){
+  const el = document.getElementById('cloudStatus');
+  if (!el) return;
+  el.className = 'cloud-status ' + state;
+  el.innerHTML = {
+    ok:      '<span class="cloud-dot"></span> Cloud Synced',
+    local:   '<span class="cloud-dot"></span> Local Only',
+    syncing: '<span class="cloud-dot"></span> Syncing…',
+    error:   '<span class="cloud-dot"></span> Sync Error',
+  }[state] || '';
+}
+
+async function cloudLoad(){
+  setCloudStatus('syncing');
+  try {
+    const r = await fetch(CLOUD_ENDPOINT, { method: 'GET' });
+    if (!r.ok) throw new Error('Cloud load failed: ' + r.status);
+    const d = await r.json();
+    if (d.success && d.data) {
+      items = Array.isArray(d.data.items) ? d.data.items : items;
+      audit = Array.isArray(d.data.audit) ? d.data.audit : audit;
+      saveLocal();
+    }
+    setCloudStatus('ok');
+    return true;
+  } catch (error) {
+    console.error(error);
+    setCloudStatus('error');
+    return false;
+  }
+}
+
+async function cloudSave(){
+  setCloudStatus('syncing');
+  try {
+    const r = await fetch(CLOUD_ENDPOINT, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, audit })
+    });
+    if (!r.ok) throw new Error('Cloud save failed: ' + r.status);
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Unknown cloud save error');
+    setCloudStatus('ok');
+  } catch (error) {
+    console.error(error);
+    setCloudStatus('error');
+  }
+}
+
 function saveAll(){
   saveLocal();
+  cloudSave();
 }
 
 // ═══════════════════════════════════════════════
@@ -491,10 +544,15 @@ function doLogin(){
   document.getElementById('app').style.display='block';
   document.getElementById('userAvatar').textContent = u[0].toUpperCase();
   document.getElementById('userLabel').textContent   = acct.role+': '+u;
-  addAudit('LOGIN','System','',`${acct.role} "${u}" signed in`);
   loadLocal();
   renderTable();
   renderAudit();
+  cloudLoad().then(() => {
+    addAudit('LOGIN','System','',`${acct.role} "${u}" signed in`);
+    saveAll();
+    renderTable();
+    renderAudit();
+  });
 }
 
 function doLogout(){

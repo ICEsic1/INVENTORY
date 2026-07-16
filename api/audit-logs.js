@@ -43,7 +43,13 @@ async function handler(req, res) {
   try {
     client = await pool.connect();
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 100, 1), 1000);
+    const result = await client.query(
+      'SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT $1',
+      [limit]
+    );
 
+    client.release();
+    res.status(200).json({ success: true, logs: result.rows });
   } catch (error) {
     if (client) try { client.release(); } catch (e) {}
     res.status(500).json({ success: false, error: error.message });

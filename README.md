@@ -1,50 +1,46 @@
 # ThreadCount — Cloud Inventory System
 
-A Node.js serverless inventory management system on Vercel with PostgreSQL.
+A lightweight inventory dashboard with local session storage and optional Vercel/Postgres cloud sync.
 
-## 🚀 Deploy to Cloud
+## 🚀 Run Locally
 
 ```bash
-npm run deploy
+npm install
+npm run dev
 ```
-
-See [VERCEL_SETUP.md](VERCEL_SETUP.md) for complete deployment guide.
 
 ## 📋 Features
 
-- **Inventory Management** — Add/edit/delete items with real-time tracking
-- **Audit Logs** — Complete history of all actions
-- **Task Management** — Kanban-style tasks with status tracking
-- **JWT Authentication** — Secure role-based access (admin/staff)
-- **Serverless** — Auto-scaling on Vercel with PostgreSQL
+- Inventory management using local storage
+- Audit trail for all inventory changes
+- Simple admin/staff login
+- Optional cloud sync endpoint at `/api/shared-cloud`
+- Database initialization via `/api/setup?action=init-db`
 
-## 🏗️ Architecture
+## 🏗️ Structure
 
 ```
-├── index.html           # Cloud UI
+├── index.html           # Frontend dashboard
 ├── api/
-│   ├── auth.js          # Login, signup, verify
-│   ├── inventory.js     # Item management
-│   ├── tasks.js         # Task management
-│   ├── audit-logs.js    # Audit history
-│   └── setup.js         # Database init
+│   ├── shared-cloud.js  # Cloud sync endpoint
+│   └── setup.js         # Database initialization
 ├── vercel.json          # Deployment config
 └── package.json         # Dependencies
 ```
 
-## 💾 Database
+## ☁️ Cloud Setup
 
-PostgreSQL with auto-initialized tables:
-- `users` — User accounts
-- `inventory` — Stock items
-- `tasks` — Task board
-- `audit_logs` — Action history
+Add environment variables in Vercel:
 
-## 👥 Users
+- `DATABASE_URL`
+- `JWT_SECRET`
 
-- **Admin** — Full system access
-- **Staff** — Inventory and task management
+Then initialize the database:
 
----
+```bash
+curl https://your-app.vercel.app/api/setup?action=init-db
+```
 
-**Deployment:** See [VERCEL_SETUP.md](VERCEL_SETUP.md) | **Live:** [inventory-jain.vercel.app](https://inventory-jain.vercel.app)
+## Notes
+
+This repository has been cleaned to keep the working dashboard and cloud sync endpoint only.
